@@ -15,7 +15,7 @@ window.jQuery || (function () {
 })();
 
 
-var getTypeOfRatio = function (val) {
+var getTypeOfPostsPerDay = function (val) {
   val = (typeof val != 'undefined') ? val : 9999999;
 
   if (val > 0 && val <= 5) {
@@ -34,33 +34,33 @@ var getColor = function (val) {
     success: '#2D7D2B'
   };
 
-  return colors[getTypeOfRatio(val)];
+  return colors[getTypeOfPostsPerDay(val)];
 };
 
 var getWeight = function (val) {
-  return (getTypeOfRatio(val) == 'success') ? 'bold' : 'normal';
+  return (getTypeOfPostsPerDay(val) == 'success') ? 'bold' : 'normal';
 };
 
 var patch = function ($items, $) {
   console.log('patch!', $items);
   $items.each(function () {
     var $this = $(this);
-    console.log(this, $(this));
-    var text = $this.text().replace(new RegExp(' ', 'gm'), '');
+    var text = $this.text().split(' ').join('');
     var digits = text.split('/');
     var perPost = parseFloat(digits[0]);
     var perDay  = parseFloat(digits[1]);
-    var ratio = Math.round(parseFloat(perDay / perPost) * 10) / 10;
+    var postsPerDay = Math.round(parseFloat(perDay / perPost) * 10) / 10;
+    var ratio = 
 
     var $patch = $('<div/>');
     $patch.css({
       padding: '3px 10px',
       margin: '2px 0 0',
-      background: getColor(ratio),
+      background: getColor(postsPerDay),
       color: '#fff',
       textAlign: 'center',
-      fontWeight: getWeight(ratio)
-    }).html(ratio);
+      fontWeight: getWeight(postsPerDay)
+    }).html(postsPerDay);
 
     $this.closest('td').addClass('patched').append($patch);
   });
