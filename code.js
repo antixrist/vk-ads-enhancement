@@ -1,3 +1,4 @@
+var ranges = [5, 10];
 var tableSelector = '#exchange_comm_search_table';
 var patchedClass = 'patched';
 var cellSelector = 'tr[class] td:nth-child(4):not(.'+ patchedClass +') b';
@@ -18,9 +19,9 @@ window.jQuery || (function () {
 var getTypeOfPostsPerDay = function (val) {
   val = (typeof val != 'undefined') ? val : 9999999;
 
-  if (val > 0 && val <= 5) {
+  if (val > 0 && val <= ranges[0]) {
     return 'success';
-  } else if (val > 5 && val <= 10) {
+  } else if (val > ranges[0] && val <= ranges[1]) {
     return 'warning';
   }
 
@@ -50,7 +51,6 @@ var patch = function ($items, $) {
     var perPost = parseFloat(digits[0]);
     var perDay  = parseFloat(digits[1]);
     var postsPerDay = Math.round(parseFloat(perDay / perPost) * 10) / 10;
-    var ratio = 
 
     var $patch = $('<div/>');
     $patch.css({
