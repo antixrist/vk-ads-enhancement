@@ -1,4 +1,3 @@
-
 window.jQuery || (function () {
   window.setTimeout(function () {
     var d = document;
@@ -11,8 +10,33 @@ window.jQuery || (function () {
   }, 1);
 })();
 
+var getCellNumber = function ($item, $) {
+  var rawText = $item.text();
+  rawText = rawText.replace(new RegExp('[^\\d\\,\\.]+', 'g'), '');
+  return parseFloat(rawText);
+};
+
+var thTpl = function (isLast, innerHtml) {
+  isLast = (!!isLast) ? 'last_column' : '';
+  innerHtml = (!!innerHtml) ? innerHtml.toString() : '';
+  var html = '<th class=\"patched paginated_table_cell '+ isLast +'\" style=\"text-align:center;padding: 5px 3px;visibility: visible;\">' +
+    '<span class=\"table_header_upper_span\" style=\"vertical-align:center;\">'+ innerHtml +'</span>' +
+  '</th>';
+
+  return html;
+};
+
+var tdTpl = function (isLast, classNames, innerHtml) {
+  isLast = (!!isLast) ? 'last_column' : '';
+  classNames = (!!classNames) ? classNames.toString() : '';
+  innerHtml = (!!innerHtml) ? innerHtml.toString() : '';
+  var html = '<td class=\"patched paginated_table_cell '+ classNames +' '+ isLast +'\" style=\"white-space: nowrap;\">'+ innerHtml +'</td>';
+  return html;
+};
 
 var patchStatsTable = function ($table, $) {
+  window.patchingStatsTable = true;
+
   var $header = $table.find('.paginated_table_header');
   var $footer = $table.find('.paginated_table_footer');
   var $rows = $table.find('.paginated_table_row, .paginated_table_footer');
@@ -26,11 +50,7 @@ var patchStatsTable = function ($table, $) {
 
     $header.find('.last_column').removeClass('last_column');
     if (!$header.find('.column_price_per_click').length) {
-      $header.append('' +
-        '<th class=\"patched paginated_table_cell column_price_per_click last_column\" style=\"text-align:center;padding: 5px 3px;visibility: visible;\">' +
-          '<span class=\"table_header_upper_span\" style=\"vertical-align:center;\">Цена клика</span>' +
-        '</th>'
-      );
+      $header.append(thTpl(true, 'Цена клика'));
     }
 
     if (!$header.find('.last_column').length) {
@@ -41,15 +61,15 @@ var patchStatsTable = function ($table, $) {
       var $row = $(row);
       $row.find('.last_column').removeClass('last_column');
 
-      var price = parseFloat($.trim($row.find('.column_money_amount_view').text()));
-      var clicks = parseFloat($.trim($row.find('.column_clicks_count_view').text()));
+      var price = getCellNumber($row.find('.column_money_amount_view'));
+      var clicks = getCellNumber($row.find('.column_clicks_count_view'));
 
       var pricePerClick = 0;
       if (clicks) {
         pricePerClick = price / clicks;
       }
       if (!$row.find('.column_price_per_click').length) {
-        $row.append('<td class=\"patched column_price_per_click paginated_table_cell last_column\" style=\"white-space: nowrap;\"></td>');
+        $row.append(tdTpl(true, 'column_price_per_click'));
       }
       $row.find('.column_price_per_click').html(pricePerClick.toFixed(2) +'&nbsp;руб.');
     });
@@ -60,25 +80,13 @@ var patchStatsTable = function ($table, $) {
 
     $header.find('.last_column').removeClass('last_column');
     if (!$header.find('.column_price_per_click').length) {
-      $header.append('' +
-        '<th class=\"patched paginated_table_cell column_price_per_click last_column\" style=\"text-align:center;padding: 5px 3px;visibility: visible;\">' +
-          '<span class=\"table_header_upper_span\" style=\"vertical-align:center;\">Цена клика</span>' +
-        '</th>'
-      );
+      $header.append(thTpl(false, 'Цена клика'));
     }
     if (!$header.find('.column_price_per_join').length) {
-      $header.append('' +
-        '<th class=\"patched paginated_table_cell column_price_per_join\" style=\"text-align:center;padding: 5px 3px;visibility: visible;\">' +
-          '<span class=\"table_header_upper_span\" style=\"vertical-align:center;\">Цена вступления</span>' +
-        '</th>'
-      );
+      $header.append(thTpl(false, 'Цена вступления'));
     }
     if (!$header.find('.column_conversion').length) {
-      $header.append('' +
-        '<th class=\"patched paginated_table_cell column_conversion last_column\" style=\"text-align:center;padding: 5px 3px;visibility: visible;\">' +
-          '<span class=\"table_header_upper_span\" style=\"vertical-align:center;\">Конверт</span>' +
-        '</th>'
-      );
+      $header.append(thTpl(false, 'Конверт'));
     }
     if (!$header.find('.last_column').length) {
       $header.find('.paginated_table_cell').addClass('last_column');
@@ -88,16 +96,16 @@ var patchStatsTable = function ($table, $) {
       var $row = $(row);
       $row.find('.last_column').removeClass('last_column');
 
-      var price = parseFloat($.trim($row.find('.column_money_amount_view').text()));
-      var clicks = parseFloat($.trim($row.find('.column_clicks_count_view').text()));
-      var joins = parseFloat($.trim($row.find('.column_joins_count_view').text()));
+      var price = getCellNumber($row.find('.column_money_amount_view'));
+      var clicks = getCellNumber($row.find('.column_clicks_count_view'));
+      var joins = getCellNumber($row.find('.column_joins_count_view'));
 
       var pricePerClick = 0;
       if (clicks) {
         pricePerClick = price / clicks;
       }
       if (!$row.find('.column_price_per_click').length) {
-        $row.append('<td class=\"patched column_price_per_click paginated_table_cell last_column\" style=\"white-space: nowrap;\"></td>');
+        $row.append(tdTpl(false, 'column_price_per_click'));
       }
       $row.find('.column_price_per_click').html(pricePerClick.toFixed(2) +'&nbsp;руб.');
 
@@ -106,7 +114,7 @@ var patchStatsTable = function ($table, $) {
         pricePerJoin = price / joins;
       }
       if (!$row.find('.column_price_per_join').length) {
-        $row.append('<td class=\"patched column_price_per_join paginated_table_cell\" style=\"white-space: nowrap;\"></td>');
+        $row.append(tdTpl(false, 'column_price_per_join'));
       }
       $row.find('.column_price_per_join').html(pricePerJoin.toFixed(2) +'&nbsp;руб.');
 
@@ -115,13 +123,15 @@ var patchStatsTable = function ($table, $) {
         convert = (joins / clicks) * 100;
       }
       if (!$row.find('.column_conversion').length) {
-        $row.append('<td class=\"patched column_conversion paginated_table_cell last_column\" style=\"white-space: nowrap;\"></td>');
+        $row.append(tdTpl(true, 'column_conversion'));
       }
       $row.find('.column_conversion').html(convert.toFixed(2) +'&nbsp;%');
     });
 
 
   }
+
+  window.patchingStatsTable = false;
 };
 
 var ranges = [5, 10];
@@ -146,6 +156,8 @@ var getWeight = function (val) {
   return (getTypeOfPostsPerDay(val) == 'success') ? 'bold' : 'normal';
 };
 var patchGroupsTable = function ($items, $) {
+  window.patchingGroupsTable = true;
+
   $items.each(function () {
     var $this = $(this);
     var text = $this.text().split(' ').join('');
@@ -161,9 +173,11 @@ var patchGroupsTable = function ($items, $) {
       color: '#fff',
       textAlign: 'center',
       fontWeight: getWeight(postsPerDay)
-    }).html(postsPerDay);
+    }).html('<b>'+ postsPerDay +'</b> в сутки');
     $this.closest('td').addClass('patched').append($patch);
   });
+
+  window.patchingGroupsTable = false;
 };
 
 
@@ -180,13 +194,16 @@ window.runPatcher = window.runPatcher || function ($) {
   tmp.parentNode.insertBefore(css, tmp);
 
   var groupsTableOldHTML = '';
+  window.patchingStatsTable = false;
+  window.patchingGroupsTable = false;
+
   var watcherInterval = window.setInterval(function () {
     var $statsTable = $('.ads_unions_table');
     if ($statsTable.length) {
       var $emptyRow = $statsTable.find('.empty_row');
       var $lastSimpleTableCell = $('.paginated_table_row:first').find('.paginated_table_cell.last_column').filter(':first');
       if (!$emptyRow.length && !$lastSimpleTableCell.hasClass('patched')) {
-        patchStatsTable($statsTable, $);
+        window.patchingStatsTable || patchStatsTable($statsTable, $);
       }
     }
 
@@ -195,7 +212,7 @@ window.runPatcher = window.runPatcher || function ($) {
       var groupsTableHTML = $groupsTable.html();
       if (groupsTableHTML != groupsTableOldHTML) {
         groupsTableOldHTML = groupsTableHTML;
-        patchGroupsTable($groupsTable.find('tr[class] td:nth-child(4):not(.patched) b'), $);
+        window.patchingGroupsTable || patchGroupsTable($groupsTable.find('tr[class] td:nth-child(4):not(.patched) b'), $);
       }
     }
 
